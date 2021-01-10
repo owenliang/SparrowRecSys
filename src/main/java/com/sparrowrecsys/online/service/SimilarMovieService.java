@@ -27,6 +27,9 @@ public class SimilarMovieService extends HttpServlet {
             //number of returned movies
             String size = request.getParameter("size");
             //model of calculating similarity, e.g. embedding, graph-embedding
+            // 基于emb排序：
+            // 1）电影序列训练的emb
+            // 2）或者基于随机游走graph序列训练的emb
             String model = request.getParameter("model");
 
             //use SimilarMovieFlow to get similar movies

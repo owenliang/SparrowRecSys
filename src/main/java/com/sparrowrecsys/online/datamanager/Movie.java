@@ -45,7 +45,7 @@ public class Movie {
         averageRating = 0;
         this.genres = new ArrayList<>();
         this.ratings = new ArrayList<>();
-        this.topRatings = new LinkedList<>();
+        this.topRatings = new LinkedList<>();   // 链表
         this.emb = null;
         this.movieFeatures = null;
     }
@@ -90,13 +90,17 @@ public class Movie {
         return ratings;
     }
 
+    // 添加一个打分记录
     public void addRating(Rating rating) {
+        // 顺便算出平均打分
         averageRating = (averageRating * ratingNumber + rating.getScore()) / (ratingNumber+1);
         ratingNumber++;
         this.ratings.add(rating);
+        // 计算TOP N打分
         addTopRating(rating);
     }
 
+    // 维护电影的TOP N打分
     public void addTopRating(Rating rating){
         if (this.topRatings.isEmpty()){
             this.topRatings.add(rating);

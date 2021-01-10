@@ -50,13 +50,19 @@ public class User {
         this.ratings = ratings;
     }
 
+    // 为用户添加打分历史
     public void addRating(Rating rating) {
         this.ratings.add(rating);
+
+        // 计算用户平均打分
         this.averageRating = (this.averageRating * ratingCount + rating.getScore()) / (ratingCount + 1);
+
+        // 用户给过的最高分
         if (rating.getScore() > highestRating){
             highestRating = rating.getScore();
         }
 
+        // 用户给过的最低分
         if (rating.getScore() < lowestRating){
             lowestRating = rating.getScore();
         }

@@ -50,6 +50,8 @@ public class DataManager {
     }
 
     //load movie data from movies.csv
+    // 加载电影基本信息
+    // 电影ID, 电影名称, 电影分类
     private void loadMovieData(String movieDataPath) throws Exception{
         System.out.println("Loading movie data from " + movieDataPath + " ...");
         boolean skipFirstLine = true;
@@ -63,23 +65,24 @@ public class DataManager {
                 String[] movieData = movieRawData.split(",");
                 if (movieData.length == 3){
                     Movie movie = new Movie();
-                    movie.setMovieId(Integer.parseInt(movieData[0]));
-                    int releaseYear = parseReleaseYear(movieData[1].trim());
+                    movie.setMovieId(Integer.parseInt(movieData[0]));   // movie id 电影ID
+                    int releaseYear = parseReleaseYear(movieData[1].trim());    // release year发布年
                     if (releaseYear == -1){
-                        movie.setTitle(movieData[1].trim());
+                        // 发布年留null
+                        movie.setTitle(movieData[1].trim());    //  电影标题
                     }else{
-                        movie.setReleaseYear(releaseYear);
-                        movie.setTitle(movieData[1].trim().substring(0, movieData[1].trim().length()-6).trim());
+                        movie.setReleaseYear(releaseYear);  // 发布年
+                        movie.setTitle(movieData[1].trim().substring(0, movieData[1].trim().length()-6).trim());    // 电影标题去除年份
                     }
                     String genres = movieData[2];
                     if (!genres.trim().isEmpty()){
                         String[] genreArray = genres.split("\\|");
                         for (String genre : genreArray){
-                            movie.addGenre(genre);
-                            addMovie2GenreIndex(genre, movie);
+                            movie.addGenre(genre);  // 电影的分类列表
+                            addMovie2GenreIndex(genre, movie);  // 分类 --> 电影 的反向索引
                         }
                     }
-                    this.movieMap.put(movie.getMovieId(), movie);
+                    this.movieMap.put(movie.getMovieId(), movie);   // 电影ID -> 电影 的索引
                 }
             }
         }
@@ -205,6 +208,7 @@ public class DataManager {
     }
 
     //load ratings data from ratings.csv
+    // 加载rating.csv用户点评数据
     private void loadRatingData(String ratingDataPath) throws Exception{
         System.out.println("Loading rating data from " + ratingDataPath + " ...");
         boolean skipFirstLine = true;
@@ -219,20 +223,24 @@ public class DataManager {
                 String[] linkData = ratingRawData.split(",");
                 if (linkData.length == 4){
                     count ++;
+                    // 用户点评电影
                     Rating rating = new Rating();
                     rating.setUserId(Integer.parseInt(linkData[0]));
                     rating.setMovieId(Integer.parseInt(linkData[1]));
                     rating.setScore(Float.parseFloat(linkData[2]));
                     rating.setTimestamp(Long.parseLong(linkData[3]));
+                    // 为电影添加该点评记录
                     Movie movie = this.movieMap.get(rating.getMovieId());
                     if (null != movie){
                         movie.addRating(rating);
                     }
+                    // 创建用户
                     if (!this.userMap.containsKey(rating.getUserId())){
                         User user = new User();
                         user.setUserId(rating.getUserId());
-                        this.userMap.put(user.getUserId(), user);
+                        this.userMap.put(user.getUserId(), user); // 用户ID --> User信息
                     }
+                    // 为用户添加点评记录
                     this.userMap.get(rating.getUserId()).addRating(rating);
                 }
             }

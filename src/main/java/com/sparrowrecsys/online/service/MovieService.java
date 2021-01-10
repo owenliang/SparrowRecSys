@@ -26,6 +26,7 @@ public class MovieService extends HttpServlet {
             String movieId = request.getParameter("id");
 
             //get movie object from DataManager
+            // 根据movieId获取Movie电影
             Movie movie = DataManager.getInstance().getMovieById(Integer.parseInt(movieId));
 
             //convert movie object to json format and return

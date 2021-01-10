@@ -38,7 +38,6 @@ public class RecommendationService extends HttpServlet {
             ObjectMapper mapper = new ObjectMapper();
             String jsonMovies = mapper.writeValueAsString(movies);
             response.getWriter().println(jsonMovies);
-
         } catch (Exception e) {
             e.printStackTrace();
             response.getWriter().println("");

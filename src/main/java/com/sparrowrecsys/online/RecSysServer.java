@@ -62,11 +62,19 @@ public class RecSysServer {
 
         //bind services with different servlets
         context.addServlet(DefaultServlet.class,"/");
+
+        // 获取电影详情，根据ID直接返回movie对象
         context.addServlet(new ServletHolder(new MovieService()), "/getmovie");
-        context.addServlet(new ServletHolder(new UserService()), "/getuser");
+        // 电影详情页，推荐相关电影（1，电影之间的策略相似度打分；2，电影之间的emb余弦距离打分；）
         context.addServlet(new ServletHolder(new SimilarMovieService()), "/getsimilarmovie");
-        context.addServlet(new ServletHolder(new RecommendationService()), "/getrecommendation");
+        
+        // 获取用户信息
+        context.addServlet(new ServletHolder(new UserService()), "/getuser");
+        // 猜你喜欢
         context.addServlet(new ServletHolder(new RecForYouService()), "/getrecforyou");
+
+        // 首页推荐列表，默认是按电影平均得分排序的，没看到模型
+        context.addServlet(new ServletHolder(new RecommendationService()), "/getrecommendation");  
 
         //set url handler
         server.setHandler(context);
