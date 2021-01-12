@@ -13,13 +13,13 @@ public class ABTest {
             return defaultModel;
         }
 
-        if(userId.hashCode() % trafficSplitNumber == 0){
+        if(userId.hashCode() % trafficSplitNumber == 0){    // A流
             System.out.println(userId + " is in bucketA.");
             return bucketAModel;
-        }else if(userId.hashCode() % trafficSplitNumber == 1){
+        }else if(userId.hashCode() % trafficSplitNumber == 1){  // B流
             System.out.println(userId + " is in bucketB.");
             return bucketBModel;
-        }else{
+        }else{  // 非实验流
             System.out.println(userId + " isn't in AB test.");
             return defaultModel;
         }

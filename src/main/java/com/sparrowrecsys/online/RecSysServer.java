@@ -70,7 +70,7 @@ public class RecSysServer {
         
         // 获取用户信息
         context.addServlet(new ServletHolder(new UserService()), "/getuser");
-        // 猜你喜欢
+        // 猜你喜欢（基于model的个性化推荐）
         context.addServlet(new ServletHolder(new RecForYouService()), "/getrecforyou");
 
         // 首页推荐列表，默认是按电影平均得分排序的，没看到模型

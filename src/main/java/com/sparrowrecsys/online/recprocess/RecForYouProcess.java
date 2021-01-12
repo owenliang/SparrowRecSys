@@ -27,14 +27,18 @@ public class RecForYouProcess {
      * @return  list of similar movies
      */
     public static List<Movie> getRecList(int userId, int size, String model){
+        // 用户
         User user = DataManager.getInstance().getUserById(userId);
         if (null == user){
             return new ArrayList<>();
         }
+
+        // 平均分TOP 800的电影候选集
         final int CANDIDATE_SIZE = 800;
         List<Movie> candidates = DataManager.getInstance().getMovies(CANDIDATE_SIZE, "rating");
 
         //load user emb from redis if data source is redis
+        // 开关：从redis实时加载user embedding，默认已经加载到User对象里了
         if (Config.EMB_DATA_SOURCE.equals(Config.DATA_SOURCE_REDIS)){
             String userEmbKey = "uEmb:" + userId;
             String userEmb = RedisClient.getInstance().get(userEmbKey);
@@ -43,6 +47,7 @@ public class RecForYouProcess {
             }
         }
 
+        // 开关：从redis实时加载user features，默认是没有从文件加载到的
         if (Config.IS_LOAD_USER_FEATURE_FROM_REDIS){
             String userFeaturesKey = "uf:" + userId;
             Map<String, String> userFeatures = RedisClient.getInstance().hgetAll(userFeaturesKey);
@@ -51,6 +56,7 @@ public class RecForYouProcess {
             }
         }
 
+        // 调用模型打分
         List<Movie> rankedList = ranker(user, candidates, model);
 
         if (rankedList.size() > size){
@@ -70,13 +76,14 @@ public class RecForYouProcess {
         HashMap<Movie, Double> candidateScoreMap = new HashMap<>();
 
         switch (model){
+            // 直接计算user和各个movie之间的emb距离
             case "emb":
                 for (Movie candidate : candidates){
                     double similarity = calculateEmbSimilarScore(user, candidate);
                     candidateScoreMap.put(candidate, similarity);
                 }
                 break;
-            case "nerualcf":
+            case "nerualcf":    // tf-serving模型打分
                 callNeuralCFTFServing(user, candidates, candidateScoreMap);
                 break;
             default:
@@ -97,6 +104,7 @@ public class RecForYouProcess {
      * @param candidate candidate movie
      * @return  similarity score
      */
+    // 计算user和movie的embedding余弦距离
     public static double calculateEmbSimilarScore(User user, Movie candidate){
         if (null == user || null == candidate || null == user.getEmb()){
             return -1;
@@ -116,6 +124,7 @@ public class RecForYouProcess {
         }
 
         JSONArray instances = new JSONArray();
+        // 准备特征{userId, movieId}
         for (Movie m : candidates){
             JSONObject instance = new JSONObject();
             instance.put("userId", user.getUserId());
@@ -123,16 +132,20 @@ public class RecForYouProcess {
             instances.put(instance);
         }
 
+        // 准备tf-serving请求
         JSONObject instancesRoot = new JSONObject();
         instancesRoot.put("instances", instances);
 
+        // 调用tf-serving
         //need to confirm the tf serving end point
         String predictionScores = asyncSinglePostRequest("http://localhost:8501/v1/models/recmodel:predict", instancesRoot.toString());
         System.out.println("send user" + user.getUserId() + " request to tf serving.");
 
         JSONObject predictionsObject = new JSONObject(predictionScores);
         JSONArray scores = predictionsObject.getJSONArray("predictions");
+        // 解析打分结果
         for (int i = 0 ; i < candidates.size(); i++){
+            // 将每个打分赋给电影
             candidateScoreMap.put(candidates.get(i), scores.getJSONArray(i).getDouble(0));
         }
     }

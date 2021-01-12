@@ -28,17 +28,21 @@ public class RecForYouService extends HttpServlet {
             response.setHeader("Access-Control-Allow-Origin", "*");
 
             //get user id via url parameter
-            String userId = request.getParameter("id");
+            String userId = request.getParameter("id"); // 用户ID
             //number of returned movies
             String size = request.getParameter("size");
             //ranking algorithm
-            String model = request.getParameter("model");
+            String model = request.getParameter("model");   // 使用的模型
 
+            // 根据AB测试选用不同的模型
             if (Config.IS_ENABLE_AB_TEST){
                 model = ABTest.getConfigByUserId(userId);
             }
 
+            model = "nerualcf";
+
             //a simple method, just fetch all the movie in the genre
+            // 模型推荐
             List<Movie> movies = RecForYouProcess.getRecList(Integer.parseInt(userId), Integer.parseInt(size), model);
 
             //convert movie list to json format and return

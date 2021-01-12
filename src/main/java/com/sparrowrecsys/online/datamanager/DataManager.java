@@ -90,6 +90,7 @@ public class DataManager {
     }
 
     //load movie embedding
+    // 加载电影的emb向量
     private void loadMovieEmb(String movieEmbPath, String embKey) throws Exception{
         if (Config.EMB_DATA_SOURCE.equals(Config.DATA_SOURCE_FILE)) {
             System.out.println("Loading movie embedding from " + movieEmbPath + " ...");
@@ -127,6 +128,7 @@ public class DataManager {
     }
 
     //load movie features
+    // 从Redis加载电影特征
     private void loadMovieFeatures(String movieFeaturesPrefix) throws Exception{
         System.out.println("Loading movie features from Redis ...");
         Set<String> movieFeaturesKeys = RedisClient.getInstance().keys(movieFeaturesPrefix + "*");
@@ -137,6 +139,7 @@ public class DataManager {
             if (null == m) {
                 continue;
             }
+            // 每个电影一个hashmap的KV特征字典
             m.setMovieFeatures(RedisClient.getInstance().hgetAll(movieFeaturesKey));
             validFeaturesCount++;
         }
@@ -144,6 +147,7 @@ public class DataManager {
     }
 
     //load user embedding
+    // 加载用户emb向量
     private void loadUserEmb(String userEmbPath, String embKey) throws Exception{
         if (Config.EMB_DATA_SOURCE.equals(Config.DATA_SOURCE_FILE)) {
             System.out.println("Loading user embedding from " + userEmbPath + " ...");
@@ -258,6 +262,7 @@ public class DataManager {
     }
 
     //get movies by genre, and order the movies by sortBy method
+    // 按分类获取电影并排序（按电影平均分 Or 按发布年）
     public List<Movie> getMoviesByGenre(String genre, int size, String sortBy){
         if (null != genre){
             List<Movie> movies = new ArrayList<>(this.genreReverseIndexMap.get(genre));
@@ -276,6 +281,7 @@ public class DataManager {
     }
 
     //get top N movies order by sortBy method
+    // 所有电影排序（按电影平均分 or 按发布年）
     public List<Movie> getMovies(int size, String sortBy){
             List<Movie> movies = new ArrayList<>(movieMap.values());
             switch (sortBy){
