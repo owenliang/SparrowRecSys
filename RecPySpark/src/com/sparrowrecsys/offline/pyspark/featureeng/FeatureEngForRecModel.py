@@ -12,7 +12,9 @@ NUMBER_PRECISION = 2
 def addSampleLabel(ratingSamples):
     ratingSamples.show(5, truncate=False)
     ratingSamples.printSchema()
+
     sampleCount = ratingSamples.count()
+
     ratingSamples.groupBy('rating').count().orderBy('rating').withColumn('percentage',
                                                                          F.col('count') / sampleCount).show()
     ratingSamples = ratingSamples.withColumn('label', when(F.col('rating') >= 3.5, 1).otherwise(0))
@@ -139,17 +141,25 @@ def splitAndSaveTrainingTestSamplesByTimeStamp(samplesWithUserFeatures, file_pat
 
 
 if __name__ == '__main__':
+    # spark会话
     conf = SparkConf().setAppName('featureEngineering').setMaster('local')
     spark = SparkSession.builder.config(conf=conf).getOrCreate()
-    file_path = 'file:///home/hadoop/SparrowRecSys/src/main/resources'
+
+    file_path = 'file:///Users/smzdm/IdeaProjects/SparrowRecSys/src/main/resources'
     movieResourcesPath = file_path + "/webroot/sampledata/movies.csv"
     ratingsResourcesPath = file_path + "/webroot/sampledata/ratings.csv"
+
+    # 加载movie基础表
     movieSamples = spark.read.format('csv').option('header', 'true').load(movieResourcesPath)
+    # 加载rating评分表
     ratingSamples = spark.read.format('csv').option('header', 'true').load(ratingsResourcesPath)
+
     ratingSamplesWithLabel = addSampleLabel(ratingSamples)
     ratingSamplesWithLabel.show(10, truncate=False)
+
     samplesWithMovieFeatures = addMovieFeatures(movieSamples, ratingSamplesWithLabel)
     samplesWithUserFeatures = addUserFeatures(samplesWithMovieFeatures)
+
     # save samples as csv format
     splitAndSaveTrainingTestSamples(samplesWithUserFeatures, file_path + "/webroot/sampledata")
     # splitAndSaveTrainingTestSamplesByTimeStamp(samplesWithUserFeatures, file_path + "/webroot/sampledata")
