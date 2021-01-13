@@ -154,6 +154,8 @@ if __name__ == '__main__':
     # 加载rating评分表
     ratingSamples = spark.read.format('csv').option('header', 'true').load(ratingsResourcesPath)
 
+    # 为rating打分样本计算标签（0：不喜欢，1：喜欢），阈值是人眼观察的
+    print("==============addSampleLabel==============")
     ratingSamplesWithLabel = addSampleLabel(ratingSamples)
     ratingSamplesWithLabel.show(10, truncate=False)
 
